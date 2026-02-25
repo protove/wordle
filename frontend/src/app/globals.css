@@ -1,0 +1,289 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================== ROOT & SCROLLBAR ==================== */
+:root {
+  --cosmic-dark: #141A26;
+  --cosmic-blue: #42708C;
+  --cosmic-light: #80ADBF;
+  --cosmic-gold: #F2BF91;
+  --cosmic-red: #733C3C;
+  --cosmic-white: #E8F1F5;
+  --cosmic-gray: #9BADB8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--cosmic-dark);
+  color: var(--cosmic-white);
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cosmic-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cosmic-blue);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cosmic-light);
+}
+
+/* ==================== TEXT SELECTION ==================== */
+::selection {
+  background: rgba(66, 112, 140, 0.5);
+  color: var(--cosmic-white);
+}
+
+/* ==================== FOCUS VISIBLE ==================== */
+:focus-visible {
+  outline: 2px solid var(--cosmic-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ==================== TILE FLIP ANIMATION ==================== */
+.tile-container {
+  perspective: 250px;
+}
+
+.tile-inner {
+  transition: transform 0.5s ease-in-out;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.tile-flip {
+  animation: tileFlipFull 0.5s ease-in-out forwards;
+}
+
+.tile-flip-back {
+  backface-visibility: hidden;
+}
+
+@keyframes tileFlipFull {
+  0% {
+    transform: rotateX(0deg);
+  }
+  49% {
+    transform: rotateX(90deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+/* ==================== STAR PARTICLES ==================== */
+.star-field {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+}
+
+.star-small {
+  width: 1px;
+  height: 1px;
+}
+
+.star-medium {
+  width: 2px;
+  height: 2px;
+}
+
+.star-large {
+  width: 3px;
+  height: 3px;
+}
+
+/* ==================== SHOOTING STAR ==================== */
+.shooting-star {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(242, 191, 145, 0.8) 50%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border-radius: 2px;
+  transform-origin: left center;
+  animation: shootingStarAnim 3s linear infinite;
+  opacity: 0;
+}
+
+.shooting-star::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 2px rgba(242, 191, 145, 0.8);
+}
+
+@keyframes shootingStarAnim {
+  0% {
+    transform: translateX(-200px) translateY(0) rotate(-15deg);
+    opacity: 0;
+    width: 0;
+  }
+  5% {
+    opacity: 1;
+    width: 80px;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(calc(100vw + 300px)) translateY(150px) rotate(-15deg);
+    opacity: 0;
+    width: 120px;
+  }
+}
+
+/* ==================== GAME BOARD PERSPECTIVE ==================== */
+.game-board {
+  perspective: 1000px;
+}
+
+/* ==================== GLOW EFFECTS ==================== */
+.cosmic-glow-gold {
+  box-shadow: 0 0 10px rgba(242, 191, 145, 0.3), 0 0 20px rgba(242, 191, 145, 0.1);
+}
+
+.cosmic-glow-blue {
+  box-shadow: 0 0 10px rgba(66, 112, 140, 0.4), 0 0 20px rgba(66, 112, 140, 0.2);
+}
+
+.cosmic-glow-text {
+  text-shadow: 0 0 10px rgba(242, 191, 145, 0.5), 0 0 20px rgba(242, 191, 145, 0.3);
+}
+
+/* ==================== KEYBOARD KEY PRESSED STATE ==================== */
+.key-pressed {
+  animation: keyPressFeedback 0.1s ease-out;
+}
+
+@keyframes keyPressFeedback {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+/* ==================== TILE STATES ==================== */
+.tile-state-correct {
+  background: linear-gradient(135deg, #F2BF91 0%, #d4a06a 100%);
+  border-color: #F2BF91;
+  color: #141A26;
+  box-shadow: 0 0 12px rgba(242, 191, 145, 0.4);
+}
+
+.tile-state-present {
+  background: linear-gradient(135deg, #42708C 0%, #2d5269 100%);
+  border-color: #42708C;
+  color: #E8F1F5;
+  box-shadow: 0 0 12px rgba(66, 112, 140, 0.4);
+}
+
+.tile-state-absent {
+  background: linear-gradient(135deg, #2a3545 0%, #1e2a3a 100%);
+  border-color: #2a3545;
+  color: #9BADB8;
+}
+
+.tile-state-empty {
+  background: transparent;
+  border-color: #2a3545;
+}
+
+.tile-state-filled {
+  background: rgba(66, 112, 140, 0.1);
+  border-color: #42708C;
+  color: #E8F1F5;
+}
+
+/* ==================== MODAL BACKDROP ==================== */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ==================== GRADIENT TEXT ==================== */
+.gradient-text-cosmic {
+  background: linear-gradient(135deg, #F2BF91 0%, #80ADBF 50%, #F2BF91 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gradientShift 4s linear infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ==================== HEADER BORDER ==================== */
+.header-border {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(66, 112, 140, 0.6) 20%,
+    rgba(242, 191, 145, 0.8) 50%,
+    rgba(66, 112, 140, 0.6) 80%,
+    transparent 100%
+  );
+  height: 1px;
+  animation: borderShimmer 3s ease-in-out infinite;
+}
+
+@keyframes borderShimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ==================== STATS BAR ==================== */
+.stats-bar-fill {
+  transition: width 1s ease-out;
+}
+
+/* ==================== NEBULA OVERLAY ==================== */
+.nebula-overlay {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(66, 112, 140, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(242, 191, 145, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(128, 173, 191, 0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
