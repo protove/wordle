@@ -8,5 +8,5 @@ data class ErrorResponse(
     val error: String,
     val message: String,
     val path: String? = null,
-    val validationErrors: Map<String, String>? = null
+    val validationErrors: Map<String, String>? = null,
 )

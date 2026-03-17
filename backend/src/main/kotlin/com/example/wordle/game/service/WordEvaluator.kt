@@ -3,7 +3,10 @@ package com.example.wordle.game.service
 import com.example.wordle.game.domain.LetterResult
 
 object WordEvaluator {
-    fun evaluate(guess: String, target: String): List<LetterResult> {
+    fun evaluate(
+        guess: String,
+        target: String,
+    ): List<LetterResult> {
         require(guess.length == 5 && target.length == 5) { "Words must be 5 letters" }
         val result = Array(5) { LetterResult.ABSENT }
         val targetRemaining = target.toCharArray()

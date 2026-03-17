@@ -15,18 +15,19 @@ import java.util.UUID
 class JwtTokenProvider(
     @Value("\${app.jwt.expiration-ms:86400000}") private val expirationMs: Long,
     @Qualifier("hmacJwtEncoder") private val jwtEncoder: JwtEncoder,
-    @Qualifier("hmacJwtDecoder") private val jwtDecoder: JwtDecoder
+    @Qualifier("hmacJwtDecoder") private val jwtDecoder: JwtDecoder,
 ) {
     fun generateToken(user: User): String {
         val now = Instant.now()
-        val claims = JwtClaimsSet.builder()
-            .issuer("cosmic-wordle")
-            .issuedAt(now)
-            .expiresAt(now.plusMillis(expirationMs))
-            .subject(user.id.toString())
-            .claim("username", user.username)
-            .claim("authorities", listOf(user.role.name))
-            .build()
+        val claims =
+            JwtClaimsSet.builder()
+                .issuer("cosmic-wordle")
+                .issuedAt(now)
+                .expiresAt(now.plusMillis(expirationMs))
+                .subject(user.id.toString())
+                .claim("username", user.username)
+                .claim("authorities", listOf(user.role.name))
+                .build()
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).tokenValue
     }
 

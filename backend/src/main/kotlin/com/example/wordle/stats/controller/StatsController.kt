@@ -6,20 +6,26 @@ import com.example.wordle.stats.service.StatsService
 import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @RestController
 @RequestMapping("/stats")
 class StatsController(
-    private val service: StatsService
+    private val service: StatsService,
 ) {
     /**
      * 현재 사용자 통계 조회
      * GET /stats
      */
     @GetMapping
-    fun getMyStats(@AuthenticationPrincipal userDetails: UserDetails): PlayerStatsResponse {
+    fun getMyStats(
+        @AuthenticationPrincipal userDetails: UserDetails,
+    ): PlayerStatsResponse {
         val userId = UUID.fromString(userDetails.username)
         return PlayerStatsResponse.from(service.getStats(userId))
     }
@@ -31,13 +37,13 @@ class StatsController(
     @PostMapping
     fun recordGameResult(
         @AuthenticationPrincipal userDetails: UserDetails,
-        @Valid @RequestBody body: GameResultRequest
+        @Valid @RequestBody body: GameResultRequest,
     ) {
         val userId = UUID.fromString(userDetails.username)
         service.recordGame(
-            userId   = userId,
+            userId = userId,
             guessCnt = body.guessCnt!!,
-            win      = body.win!!
+            win = body.win!!,
         )
     }
 }

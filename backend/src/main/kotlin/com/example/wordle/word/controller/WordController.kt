@@ -19,17 +19,20 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/words")
 class WordController(private val wordService: WordService) {
-
     @GetMapping
-    fun getWords(@RequestParam isAnswer: Boolean? = null): List<WordResponse> =
-        wordService.getAllWords(isAnswer)
+    fun getWords(
+        @RequestParam isAnswer: Boolean? = null,
+    ): List<WordResponse> = wordService.getAllWords(isAnswer)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun addWord(@Valid @RequestBody request: WordRequest): WordResponse =
-        wordService.addWord(request)
+    fun addWord(
+        @Valid @RequestBody request: WordRequest,
+    ): WordResponse = wordService.addWord(request)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteWord(@PathVariable id: UUID) = wordService.deleteWord(id)
+    fun deleteWord(
+        @PathVariable id: UUID,
+    ) = wordService.deleteWord(id)
 }

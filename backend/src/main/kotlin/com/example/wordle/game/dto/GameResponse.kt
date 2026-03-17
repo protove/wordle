@@ -10,7 +10,7 @@ import java.util.UUID
 data class GuessDetail(
     val guessNumber: Int,
     val guessWord: String,
-    val result: List<LetterResult>
+    val result: List<LetterResult>,
 )
 
 data class GameResponse(
@@ -21,21 +21,26 @@ data class GameResponse(
     val attemptsUsed: Int,
     val maxAttempts: Int = 6,
     val guesses: List<GuessDetail>,
-    val targetWord: String?, // revealed only when game ends
+    // revealed only when game ends
+    val targetWord: String?,
     val startedAt: LocalDateTime,
-    val endedAt: LocalDateTime?
+    val endedAt: LocalDateTime?,
 ) {
     companion object {
-        fun from(game: Game, revealWord: Boolean = false): GameResponse {
-            val guessDetails = game.guesses
-                .sortedBy { it.guessNumber }
-                .map { guess ->
-                    GuessDetail(
-                        guessNumber = guess.guessNumber,
-                        guessWord = guess.guessWord,
-                        result = guess.result.split(",").map { LetterResult.valueOf(it) }
-                    )
-                }
+        fun from(
+            game: Game,
+            revealWord: Boolean = false,
+        ): GameResponse {
+            val guessDetails =
+                game.guesses
+                    .sortedBy { it.guessNumber }
+                    .map { guess ->
+                        GuessDetail(
+                            guessNumber = guess.guessNumber,
+                            guessWord = guess.guessWord,
+                            result = guess.result.split(",").map { LetterResult.valueOf(it) },
+                        )
+                    }
             return GameResponse(
                 id = game.id,
                 userId = game.userId,
@@ -45,14 +50,14 @@ data class GameResponse(
                 guesses = guessDetails,
                 targetWord = if (revealWord || game.status != GameStatus.IN_PROGRESS) game.targetWord else null,
                 startedAt = game.startedAt,
-                endedAt = game.endedAt
+                endedAt = game.endedAt,
             )
         }
     }
 }
 
 data class GuessRequest(
-    val word: String
+    val word: String,
 )
 
 data class GuessResponse(
@@ -61,7 +66,8 @@ data class GuessResponse(
     val result: List<LetterResult>,
     val gameStatus: GameStatus,
     val attemptsRemaining: Int,
-    val targetWord: String? // revealed on game end (lost)
+    // revealed on game end (lost)
+    val targetWord: String?,
 )
 
 data class GameSummaryResponse(
@@ -69,5 +75,5 @@ data class GameSummaryResponse(
     val gameDate: LocalDate,
     val status: GameStatus,
     val attemptsUsed: Int,
-    val targetWord: String
+    val targetWord: String,
 )

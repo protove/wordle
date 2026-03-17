@@ -9,12 +9,12 @@ import jakarta.persistence.Embeddable
  */
 @Embeddable
 data class GuessDist(
-    val one:   Int = 0,
-    val two:   Int = 0,
+    val one: Int = 0,
+    val two: Int = 0,
     val three: Int = 0,
-    val four:  Int = 0,
-    val five:  Int = 0,
-    val six:   Int = 0
+    val four: Int = 0,
+    val five: Int = 0,
+    val six: Int = 0,
 ) {
     /** 총 승리 횟수 합계 계산 (필요 시) */
     fun totalWins(): Int = one + two + three + four + five + six

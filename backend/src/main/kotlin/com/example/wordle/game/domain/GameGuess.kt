@@ -15,20 +15,16 @@ import java.util.UUID
 class GameGuess(
     @Id
     val id: UUID = UUID.randomUUID(),
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id", nullable = false)
     val game: Game,
-
     @Column(name = "guess_word", nullable = false, length = 10)
     val guessWord: String,
-
+    // CSV: "CORRECT,PRESENT,ABSENT,ABSENT,CORRECT"
     @Column(nullable = false, length = 50)
-    val result: String, // CSV: "CORRECT,PRESENT,ABSENT,ABSENT,CORRECT"
-
+    val result: String,
     @Column(name = "guess_number", nullable = false)
     val guessNumber: Int,
-
     @Column(name = "created_at")
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 )

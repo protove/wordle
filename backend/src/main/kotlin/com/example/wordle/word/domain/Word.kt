@@ -12,13 +12,10 @@ import java.util.UUID
 class Word(
     @Id
     val id: UUID = UUID.randomUUID(),
-
     @Column(nullable = false, unique = true, length = 10)
     val word: String,
-
     @Column(name = "is_answer", nullable = false)
     val isAnswer: Boolean = false,
-
     @Column(name = "created_at")
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(),
 )

@@ -18,58 +18,60 @@ java.sourceCompatibility = JavaVersion.VERSION_21
 repositories { mavenCentral() }
 
 dependencies {
-    /* ─ 앱 ─ */
+    // ─ 앱 ─
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    
-    /* ─ Database ─ */
+
+    // ─ Database ─
     runtimeOnly("org.postgresql:postgresql")
 
-    /* ─ Flyway ─ */
+    // ─ Flyway ─
     implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
-    
-    /* ─ Security & JWT (HMAC-SHA256) ─ */
+
+    // ─ Security & JWT (HMAC-SHA256) ─
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-oauth2-jose")
 
-    /* ─ 테스트 ─ */
+    // ─ 테스트 ─
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.mockito", module = "mockito-core")
         exclude(group = "org.mockito", module = "mockito-junit-jupiter")
         exclude(group = "org.mockito", module = "mockito-inline")
     }
-    testImplementation("com.h2database:h2")  // H2 데이터베이스 추가
+    testImplementation("com.h2database:h2") // H2 데이터베이스 추가
     testImplementation("org.springframework.security:spring-security-test")
 }
 
 springBoot { mainClass.set("com.example.wordle.WordleApplicationKt") }
 
-/* Kotlin 2.0 compilerOptions */
+// Kotlin 2.0 compilerOptions
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions { jvmTarget.set(JvmTarget.JVM_21) }
 }
 
-/* 테스트 JVM 설정 */
+// 테스트 JVM 설정
 tasks.test {
     useJUnitPlatform()
-    
+
     // JVM 모듈 시스템 관련 설정만 유지
     jvmArgs(
-        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
-        "--add-opens", "java.base/java.util=ALL-UNNAMED"
+        "--add-opens",
+        "java.base/java.lang=ALL-UNNAMED",
+        "--add-opens",
+        "java.base/java.util=ALL-UNNAMED",
     )
 }
 
-/* ─ jib, ktlint, detekt 등을 기존대로 유지 ─ */
+// ─ jib, ktlint, detekt 등을 기존대로 유지 ─
 jib {
     from.image = "eclipse-temurin:21-jre"
-    to.image   = "registry.example.com/wordle-backend"
-    to.tags    = setOf("latest", System.getenv("GITHUB_SHA") ?: "dev")
+    to.image = "registry.example.com/wordle-backend"
+    to.tags = setOf("latest", System.getenv("GITHUB_SHA") ?: "dev")
 }
 
 tasks.named("check") {

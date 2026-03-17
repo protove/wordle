@@ -22,14 +22,13 @@ import org.springframework.web.cors.CorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class JwtSecurityConfig(
-    private val corsConfigurationSource: CorsConfigurationSource
+    private val corsConfigurationSource: CorsConfigurationSource,
 ) {
-
     @Bean
     @Order(2)
     fun apiSecurityFilterChain(
         http: HttpSecurity,
-        @Qualifier("hmacJwtDecoder") hmacJwtDecoder: JwtDecoder
+        @Qualifier("hmacJwtDecoder") hmacJwtDecoder: JwtDecoder,
     ): SecurityFilterChain {
         return http
             .securityMatcher("/api/**")
@@ -59,7 +58,7 @@ class JwtSecurityConfig(
     @Order(3)
     fun resourceServerSecurityFilterChain(
         http: HttpSecurity,
-        @Qualifier("hmacJwtDecoder") hmacJwtDecoder: JwtDecoder
+        @Qualifier("hmacJwtDecoder") hmacJwtDecoder: JwtDecoder,
     ): SecurityFilterChain {
         return http
             .securityMatcher("/stats/**", "/actuator/health")

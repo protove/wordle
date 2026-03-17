@@ -1,7 +1,11 @@
 package com.example.wordle.stats.domain
 
-import jakarta.persistence.*
-import java.util.*
+import jakarta.persistence.Column
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.Table
+import java.util.UUID
 
 /**
  * 사용자별 누적 통계 엔티티.
@@ -11,24 +15,18 @@ import java.util.*
 @Entity
 @Table(name = "player_stats")
 data class PlayerStats(
-
     @Id
     @Column(name = "user_id", nullable = false)
     val userId: UUID,
-
     var games: Int = 0,
     var wins: Int = 0,
-
     @Column(name = "cur_streak")
     var curStreak: Int = 0,
-
     @Column(name = "max_streak")
     var maxStreak: Int = 0,
-
     @Embedded
-    var dist: GuessDist = GuessDist()
+    var dist: GuessDist = GuessDist(),
 ) {
-    
     // JPA를 위한 기본 생성자
     constructor() : this(UUID.randomUUID())
 

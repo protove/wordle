@@ -16,14 +16,16 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/auth")
 class ApiAuthController(
-    private val authService: AuthService
+    private val authService: AuthService,
 ) {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    fun signup(@Valid @RequestBody request: SignupRequest): SignupResponse =
-        authService.signup(request)
+    fun signup(
+        @Valid @RequestBody request: SignupRequest,
+    ): SignupResponse = authService.signup(request)
 
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: LoginRequest): LoginResponse =
-        authService.login(request)
+    fun login(
+        @Valid @RequestBody request: LoginRequest,
+    ): LoginResponse = authService.login(request)
 }

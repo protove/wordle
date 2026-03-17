@@ -6,6 +6,8 @@ import java.util.UUID
 
 interface WordRepository : JpaRepository<Word, UUID> {
     fun findAllByIsAnswer(isAnswer: Boolean): List<Word>
+
     fun existsByWord(word: String): Boolean
+
     fun findByWord(word: String): Word?
 }

@@ -20,25 +20,26 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/games")
 class GameController(private val gameService: GameService) {
-
     private fun userId(jwt: Jwt): UUID = UUID.fromString(jwt.subject)
 
     /** GET /api/games/today - start or get today's game */
     @GetMapping("/today")
-    fun getTodaysGame(@AuthenticationPrincipal jwt: Jwt): GameResponse =
-        gameService.startOrGetTodaysGame(userId(jwt))
+    fun getTodaysGame(
+        @AuthenticationPrincipal jwt: Jwt,
+    ): GameResponse = gameService.startOrGetTodaysGame(userId(jwt))
 
     /** GET /api/games/{id} - get specific game */
     @GetMapping("/{id}")
     fun getGame(
         @AuthenticationPrincipal jwt: Jwt,
-        @PathVariable id: UUID
+        @PathVariable id: UUID,
     ): GameResponse = gameService.getGame(userId(jwt), id)
 
     /** GET /api/games - game history */
     @GetMapping
-    fun getHistory(@AuthenticationPrincipal jwt: Jwt): List<GameSummaryResponse> =
-        gameService.getGameHistory(userId(jwt))
+    fun getHistory(
+        @AuthenticationPrincipal jwt: Jwt,
+    ): List<GameSummaryResponse> = gameService.getGameHistory(userId(jwt))
 
     /** POST /api/games/{id}/guesses - submit guess */
     @PostMapping("/{id}/guesses")
@@ -46,6 +47,6 @@ class GameController(private val gameService: GameService) {
     fun submitGuess(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable id: UUID,
-        @RequestBody request: GuessRequest
+        @RequestBody request: GuessRequest,
     ): GuessResponse = gameService.submitGuess(userId(jwt), id, request.word)
 }

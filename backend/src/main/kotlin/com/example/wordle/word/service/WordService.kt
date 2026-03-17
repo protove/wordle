@@ -12,7 +12,6 @@ import java.util.UUID
 
 @Service
 class WordService(private val wordRepository: WordRepository) {
-
     fun getTodaysWord(): String {
         val answers = wordRepository.findAllByIsAnswer(true)
         require(answers.isNotEmpty()) { "No answer words in database" }
@@ -21,13 +20,15 @@ class WordService(private val wordRepository: WordRepository) {
         return answers[index].word.uppercase()
     }
 
-    fun isValidWord(word: String): Boolean =
-        wordRepository.existsByWord(word.uppercase())
+    fun isValidWord(word: String): Boolean = wordRepository.existsByWord(word.uppercase())
 
     @Transactional(readOnly = true)
     fun getAllWords(isAnswer: Boolean?): List<WordResponse> =
-        if (isAnswer != null) wordRepository.findAllByIsAnswer(isAnswer).map(WordResponse::from)
-        else wordRepository.findAll().map(WordResponse::from)
+        if (isAnswer != null) {
+            wordRepository.findAllByIsAnswer(isAnswer).map(WordResponse::from)
+        } else {
+            wordRepository.findAll().map(WordResponse::from)
+        }
 
     @Transactional
     fun addWord(request: WordRequest): WordResponse {

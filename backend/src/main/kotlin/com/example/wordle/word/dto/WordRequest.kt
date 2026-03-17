@@ -9,6 +9,5 @@ data class WordRequest(
     @field:Size(min = 5, max = 5, message = "단어는 정확히 5글자여야 합니다")
     @field:Pattern(regexp = "^[A-Za-z]+$", message = "영문자만 허용됩니다")
     val word: String,
-
-    val isAnswer: Boolean = false
+    val isAnswer: Boolean = false,
 )

@@ -6,15 +6,20 @@ import com.example.wordle.stats.service.StatsService
 import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
 @RequestMapping("/api/stats")
 class ApiStatsController(private val statsService: StatsService) {
-
     @GetMapping
-    fun getMyStats(@AuthenticationPrincipal jwt: Jwt): PlayerStatsResponse {
+    fun getMyStats(
+        @AuthenticationPrincipal jwt: Jwt,
+    ): PlayerStatsResponse {
         val userId = UUID.fromString(jwt.subject)
         return PlayerStatsResponse.from(statsService.getStats(userId))
     }
@@ -22,13 +27,13 @@ class ApiStatsController(private val statsService: StatsService) {
     @PostMapping
     fun recordGameResult(
         @AuthenticationPrincipal jwt: Jwt,
-        @Valid @RequestBody body: GameResultRequest
+        @Valid @RequestBody body: GameResultRequest,
     ) {
         val userId = UUID.fromString(jwt.subject)
         statsService.recordGame(
-            userId   = userId,
+            userId = userId,
             guessCnt = body.guessCnt!!,
-            win      = body.win!!
+            win = body.win!!,
         )
     }
 }

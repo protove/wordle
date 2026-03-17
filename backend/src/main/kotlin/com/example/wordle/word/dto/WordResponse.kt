@@ -6,7 +6,7 @@ import java.util.UUID
 data class WordResponse(
     val id: UUID,
     val word: String,
-    val isAnswer: Boolean
+    val isAnswer: Boolean,
 ) {
     companion object {
         fun from(word: Word) = WordResponse(word.id, word.word.uppercase(), word.isAnswer)

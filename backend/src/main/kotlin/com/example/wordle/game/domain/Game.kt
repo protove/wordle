@@ -17,34 +17,26 @@ import java.util.UUID
 @Entity
 @Table(
     name = "games",
-    uniqueConstraints = [UniqueConstraint(columnNames = ["user_id", "game_date"])]
+    uniqueConstraints = [UniqueConstraint(columnNames = ["user_id", "game_date"])],
 )
 class Game(
     @Id
     val id: UUID = UUID.randomUUID(),
-
     @Column(name = "user_id", nullable = false)
     val userId: UUID,
-
     @Column(name = "target_word", nullable = false, length = 10)
     val targetWord: String,
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     var status: GameStatus = GameStatus.IN_PROGRESS,
-
     @Column(name = "attempts_used", nullable = false)
     var attemptsUsed: Int = 0,
-
     @Column(name = "game_date", nullable = false)
     val gameDate: LocalDate = LocalDate.now(),
-
     @Column(name = "started_at")
     val startedAt: LocalDateTime = LocalDateTime.now(),
-
     @Column(name = "ended_at")
     var endedAt: LocalDateTime? = null,
-
     @OneToMany(mappedBy = "game", cascade = [CascadeType.ALL], fetch = FetchType.LAZY, orphanRemoval = true)
-    val guesses: MutableList<GameGuess> = mutableListOf()
+    val guesses: MutableList<GameGuess> = mutableListOf(),
 )

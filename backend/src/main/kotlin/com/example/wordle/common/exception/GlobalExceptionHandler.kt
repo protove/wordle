@@ -10,77 +10,89 @@ import org.springframework.web.context.request.WebRequest
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
-
     @ExceptionHandler(DuplicateResourceException::class)
     @ResponseStatus(HttpStatus.CONFLICT)
     fun handleDuplicateResource(
         ex: DuplicateResourceException,
-        request: WebRequest
+        request: WebRequest,
     ): ErrorResponse {
         return ErrorResponse(
             status = HttpStatus.CONFLICT.value(),
             error = "Duplicate Resource",
             message = ex.message ?: "리소스가 중복됩니다",
-            path = request.getDescription(false).removePrefix("uri=")
+            path = request.getDescription(false).removePrefix("uri="),
         )
     }
 
     @ExceptionHandler(NotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFound(ex: NotFoundException, request: WebRequest): ErrorResponse =
+    fun handleNotFound(
+        ex: NotFoundException,
+        request: WebRequest,
+    ): ErrorResponse =
         ErrorResponse(
             status = HttpStatus.NOT_FOUND.value(),
             error = "Not Found",
             message = ex.message ?: "리소스를 찾을 수 없습니다",
-            path = request.getDescription(false).removePrefix("uri=")
+            path = request.getDescription(false).removePrefix("uri="),
         )
 
     @ExceptionHandler(BadRequestException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleBadRequest(ex: BadRequestException, request: WebRequest): ErrorResponse =
+    fun handleBadRequest(
+        ex: BadRequestException,
+        request: WebRequest,
+    ): ErrorResponse =
         ErrorResponse(
             status = HttpStatus.BAD_REQUEST.value(),
             error = "Bad Request",
             message = ex.message ?: "잘못된 요청입니다",
-            path = request.getDescription(false).removePrefix("uri=")
+            path = request.getDescription(false).removePrefix("uri="),
         )
 
     @ExceptionHandler(ForbiddenException::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleForbidden(ex: ForbiddenException, request: WebRequest): ErrorResponse =
+    fun handleForbidden(
+        ex: ForbiddenException,
+        request: WebRequest,
+    ): ErrorResponse =
         ErrorResponse(
             status = HttpStatus.FORBIDDEN.value(),
             error = "Forbidden",
             message = ex.message ?: "접근이 거부되었습니다",
-            path = request.getDescription(false).removePrefix("uri=")
+            path = request.getDescription(false).removePrefix("uri="),
         )
 
     @ExceptionHandler(BadCredentialsException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    fun handleBadCredentials(ex: BadCredentialsException, request: WebRequest): ErrorResponse =
+    fun handleBadCredentials(
+        ex: BadCredentialsException,
+        request: WebRequest,
+    ): ErrorResponse =
         ErrorResponse(
             status = HttpStatus.UNAUTHORIZED.value(),
             error = "Unauthorized",
             message = ex.message ?: "인증에 실패했습니다",
-            path = request.getDescription(false).removePrefix("uri=")
+            path = request.getDescription(false).removePrefix("uri="),
         )
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleValidation(
         ex: MethodArgumentNotValidException,
-        request: WebRequest
+        request: WebRequest,
     ): ErrorResponse {
-        val validationErrors = ex.bindingResult.fieldErrors.associate {
-            it.field to (it.defaultMessage ?: "유효하지 않은 값입니다")
-        }
+        val validationErrors =
+            ex.bindingResult.fieldErrors.associate {
+                it.field to (it.defaultMessage ?: "유효하지 않은 값입니다")
+            }
 
         return ErrorResponse(
             status = HttpStatus.BAD_REQUEST.value(),
             error = "Validation Failed",
             message = "입력값 검증에 실패했습니다",
             path = request.getDescription(false).removePrefix("uri="),
-            validationErrors = validationErrors
+            validationErrors = validationErrors,
         )
     }
 
@@ -88,13 +100,13 @@ class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleGeneral(
         ex: Exception,
-        request: WebRequest
+        request: WebRequest,
     ): ErrorResponse {
         return ErrorResponse(
             status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
             error = "Internal Server Error",
             message = "서버 내부 오류가 발생했습니다",
-            path = request.getDescription(false).removePrefix("uri=")
+            path = request.getDescription(false).removePrefix("uri="),
         )
     }
 }

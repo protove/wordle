@@ -7,7 +7,8 @@ data class PlayerStatsResponse(
     val gamesWon: Int = 0,
     val currentStreak: Int = 0,
     val maxStreak: Int = 0,
-    val guessDistribution: List<Int> = List(6) { 0 }   // index 0 = 1 guess, index 5 = 6 guesses
+    // index 0 = 1 guess, index 5 = 6 guesses
+    val guessDistribution: List<Int> = List(6) { 0 },
 ) {
     companion object {
         fun from(stats: PlayerStats): PlayerStatsResponse {
@@ -16,14 +17,15 @@ data class PlayerStatsResponse(
                 gamesWon = stats.wins,
                 currentStreak = stats.curStreak,
                 maxStreak = stats.maxStreak,
-                guessDistribution = listOf(
-                    stats.dist.one,
-                    stats.dist.two,
-                    stats.dist.three,
-                    stats.dist.four,
-                    stats.dist.five,
-                    stats.dist.six
-                )
+                guessDistribution =
+                    listOf(
+                        stats.dist.one,
+                        stats.dist.two,
+                        stats.dist.three,
+                        stats.dist.four,
+                        stats.dist.five,
+                        stats.dist.six,
+                    ),
             )
         }
     }

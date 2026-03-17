@@ -25,7 +25,7 @@ class GameService(
     private val gameRepository: GameRepository,
     private val gameGuessRepository: GameGuessRepository,
     private val wordService: WordService,
-    private val statsService: StatsService
+    private val statsService: StatsService,
 ) {
     companion object {
         const val MAX_ATTEMPTS = 6
@@ -40,16 +40,22 @@ class GameService(
         }
         // Create new game with today's word
         val targetWord = wordService.getTodaysWord()
-        val game = gameRepository.save(
-            Game(userId = userId, targetWord = targetWord, gameDate = today)
-        )
+        val game =
+            gameRepository.save(
+                Game(userId = userId, targetWord = targetWord, gameDate = today),
+            )
         return GameResponse.from(game)
     }
 
     @Transactional
-    fun submitGuess(userId: UUID, gameId: UUID, guessWord: String): GuessResponse {
-        val game = gameRepository.findById(gameId)
-            .orElseThrow { NotFoundException("Game not found: $gameId") }
+    fun submitGuess(
+        userId: UUID,
+        gameId: UUID,
+        guessWord: String,
+    ): GuessResponse {
+        val game =
+            gameRepository.findById(gameId)
+                .orElseThrow { NotFoundException("Game not found: $gameId") }
 
         if (game.userId != userId) throw ForbiddenException("Access denied")
         if (game.status != GameStatus.IN_PROGRESS) throw BadRequestException("Game already finished")
@@ -64,12 +70,13 @@ class GameService(
         val resultCsv = letterResults.joinToString(",") { it.name }
 
         game.attemptsUsed++
-        val guess = GameGuess(
-            game = game,
-            guessWord = upper,
-            result = resultCsv,
-            guessNumber = game.attemptsUsed
-        )
+        val guess =
+            GameGuess(
+                game = game,
+                guessWord = upper,
+                result = resultCsv,
+                guessNumber = game.attemptsUsed,
+            )
         gameGuessRepository.save(guess)
         game.guesses.add(guess)
 
@@ -90,14 +97,18 @@ class GameService(
             result = letterResults,
             gameStatus = game.status,
             attemptsRemaining = MAX_ATTEMPTS - game.attemptsUsed,
-            targetWord = if (isLost) game.targetWord else null
+            targetWord = if (isLost) game.targetWord else null,
         )
     }
 
     @Transactional(readOnly = true)
-    fun getGame(userId: UUID, gameId: UUID): GameResponse {
-        val game = gameRepository.findById(gameId)
-            .orElseThrow { NotFoundException("Game not found: $gameId") }
+    fun getGame(
+        userId: UUID,
+        gameId: UUID,
+    ): GameResponse {
+        val game =
+            gameRepository.findById(gameId)
+                .orElseThrow { NotFoundException("Game not found: $gameId") }
         if (game.userId != userId) throw ForbiddenException("Access denied")
         return GameResponse.from(game, game.status != GameStatus.IN_PROGRESS)
     }
@@ -110,7 +121,7 @@ class GameService(
                 gameDate = game.gameDate,
                 status = game.status,
                 attemptsUsed = game.attemptsUsed,
-                targetWord = game.targetWord
+                targetWord = game.targetWord,
             )
         }
 }

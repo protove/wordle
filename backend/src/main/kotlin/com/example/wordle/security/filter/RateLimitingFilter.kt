@@ -10,15 +10,14 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 class RateLimitingFilter(
     private val maxRequests: Int = 20,
-    private val windowMs: Long = 60_000L
+    private val windowMs: Long = 60_000L,
 ) : OncePerRequestFilter() {
-
     private val requestLog = ConcurrentHashMap<String, CopyOnWriteArrayList<Long>>()
 
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        filterChain: FilterChain
+        filterChain: FilterChain,
     ) {
         val clientIp = resolveClientIp(request)
         val now = System.currentTimeMillis()

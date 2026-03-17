@@ -16,14 +16,15 @@ import javax.crypto.spec.SecretKeySpec
 
 @Configuration
 class JwtConfig(
-    @Value("\${app.jwt.secret}") private val jwtSecret: String
+    @Value("\${app.jwt.secret}") private val jwtSecret: String,
 ) {
     @Bean
     @Qualifier("hmacJwtEncoder")
     fun hmacJwtEncoder(): JwtEncoder {
-        val key = OctetSequenceKey.Builder(jwtSecret.toByteArray(Charsets.UTF_8))
-            .algorithm(JWSAlgorithm.HS256)
-            .build()
+        val key =
+            OctetSequenceKey.Builder(jwtSecret.toByteArray(Charsets.UTF_8))
+                .algorithm(JWSAlgorithm.HS256)
+                .build()
         return NimbusJwtEncoder(ImmutableJWKSet(com.nimbusds.jose.jwk.JWKSet(key)))
     }
 

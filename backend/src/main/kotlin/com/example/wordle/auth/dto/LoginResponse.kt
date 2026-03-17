@@ -8,5 +8,5 @@ data class LoginResponse(
     val userId: UUID,
     val username: String,
     val role: String,
-    val expiresIn: Long = 86400
+    val expiresIn: Long = 86400,
 )

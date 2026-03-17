@@ -9,5 +9,5 @@ data class SignupResponse(
     val accessToken: String,
     val tokenType: String = "Bearer",
     val expiresIn: Long = 86400,
-    val message: String = "회원가입이 완료되었습니다"
+    val message: String = "회원가입이 완료되었습니다",
 )
