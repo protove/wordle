@@ -43,7 +43,7 @@
 | **Zero Local Setup** | 모든 실행 환경을 Docker Compose로 캡슐화, 로컬에 Java·Node.js 불필요 |
 | **Guest-First UX** | 비로그인 상태에서도 완전한 게임 플레이 가능 (localStorage 기반) |
 | **Auth-Optional Sync** | 로그인 시 게임 결과가 백엔드와 자동 동기화 (fire-and-forget) |
-| **Dual JWT Architecture** | OAuth2 RSA JWT + HMAC-SHA256 JWT를 분리된 Security Filter Chain으로 공존 |
+| **HMAC JWT + Rate Limiting** | HMAC-SHA256 JWT 인증 + IP 기반 Rate Limiting으로 경량 보안 |
 
 ---
 
@@ -74,7 +74,7 @@
 |------|------|
 | Language | Kotlin 2.0 |
 | Framework | Spring Boot 3.3 |
-| Security | Spring Security · OAuth2 Authorization Server · JWT (HMAC-SHA256 / RSA) |
+| Security | Spring Security · JWT (HMAC-SHA256) · Rate Limiting |
 | ORM | Spring Data JPA + Hibernate |
 | Database | PostgreSQL 15 (AWS RDS) |
 | Migration | Flyway |
@@ -112,11 +112,10 @@
 │  │                      │    │                         │   │
 │  │  • App Router        │    │  Security Filter Chains │   │
 │  │  • useReducer        │    │  ┌─────────────────┐    │   │
-│  │  • useAuth (JWT)     │    │  │ @Order(1) OAuth2│    │   │
-│  │  • Cosmic Animations │    │  │ @Order(2) HMAC  │    │   │
-│  │  • localStorage      │    │  │   JWT /api/**   │    │   │
-│  └──────────────────────┘    │  │ @Order(3) RSA   │    │   │
-│                              │  │   /stats/**     │    │   │
+│  │  • useAuth (JWT)     │    │  │ @Order(2) HMAC  │    │   │
+│  │  • Cosmic Animations │    │  │   JWT /api/**   │    │   │
+│  │  • localStorage      │    │  │ @Order(3) HMAC  │    │   │
+│  └──────────────────────┘    │  │   /stats/**     │    │   │
 │                              │  │ @Order(4) Form  │    │   │
 │                              │  └─────────────────┘    │   │
 │                              │                         │   │
@@ -146,8 +145,11 @@ Request → /api/** 경로
 
 Request → /stats/** 경로
     └─ @Order(3) ResourceServerSecurityFilterChain
-           └─ RSA JwtDecoder (OAuth2 Authorization Server 발급 토큰)
+           └─ HMAC-SHA256 JwtDecoder (@Qualifier)
 ```
+
+> **HTTPS 정책:** HTTPS 강제는 인프라 레벨(ALB, nginx 리버스 프록시)에서 처리합니다.
+> 보안 아키텍처 상세 — [docs/SECURITY-IMPROVEMENTS.md](docs/SECURITY-IMPROVEMENTS.md)
 
 ---
 
@@ -171,13 +173,17 @@ wordle-backend/
 │   │   │       └── WordEvaluator.kt  # 2-pass 정답 평가 알고리즘
 │   │   ├── security/
 │   │   │   ├── CorsConfig.kt         # 환경변수 기반 CORS 설정
-│   │   │   ├── JwtConfig.kt          # HMAC/RSA JWT Bean 분리 (@Qualifier)
-│   │   │   ├── JwtSecurityConfig.kt  # 4개 Security Filter Chain (@Order)
-│   │   │   └── JwtTokenProvider.kt   # 토큰 생성 유틸
+│   │   │   ├── JwtConfig.kt          # HMAC JWT Bean (@Qualifier)
+│   │   │   ├── JwtSecurityConfig.kt  # 3개 Security Filter Chain (@Order)
+│   │   │   ├── JwtTokenProvider.kt   # 토큰 생성 유틸
+│   │   │   ├── config/
+│   │   │   │   └── RateLimitingConfig.kt  # IP 기반 Rate Limiting 설정
+│   │   │   └── filter/
+│   │   │       └── RateLimitingFilter.kt  # 슬라이딩 윈도우 Rate Limiter
 │   │   ├── stats/
 │   │   │   ├── controller/
 │   │   │   │   ├── ApiStatsController.kt  # GET/POST /api/stats (HMAC JWT)
-│   │   │   │   └── StatsController.kt     # /stats/** (RSA JWT, legacy)
+│   │   │   │   └── StatsController.kt     # /stats/** (HMAC JWT)
 │   │   │   ├── domain/               # PlayerStats, GuessDist
 │   │   │   └── service/              # StatsService
 │   │   └── word/
@@ -510,21 +516,24 @@ logging:
   └────────────┘
 ```
 
-### Dual JWT 구조
+### JWT 구조 (HMAC-SHA256)
 
 ```
 ┌─────────────────────────────────────┐
 │  JwtConfig.kt                       │
 │                                     │
-│  @Bean @Qualifier("hmacJwtEncoder") │  ← /api/** 용
+│  @Bean @Qualifier("hmacJwtEncoder") │  ← 토큰 발급
 │  fun hmacJwtEncoder(): JwtEncoder   │    HMAC-SHA256 (대칭키)
 │                                     │    JWT_SECRET 환경변수
-│  @Bean @Qualifier("hmacJwtDecoder") │
-│  fun hmacJwtDecoder(): JwtDecoder   │
-│                                     │
-│  (별도) OAuth2 Authorization Server │  ← /stats/** 용
-│  RSA 키쌍 JwtEncoder/Decoder        │    keystore.p12
+│  @Bean @Qualifier("hmacJwtDecoder") │  ← 토큰 검증
+│  fun hmacJwtDecoder(): JwtDecoder   │    /api/**, /stats/** 공통
 └─────────────────────────────────────┘
+
+보안 레이어:
+  RateLimitingFilter → /api/auth/* (IP당 분당 20회)
+  @Order(2) ApiSecurityFilterChain → /api/** (HMAC JWT)
+  @Order(3) ResourceServerFilterChain → /stats/** (HMAC JWT)
+  @Order(4) DefaultSecurityFilterChain → 나머지 (폼 로그인)
 ```
 
 ---
@@ -631,7 +640,6 @@ UNIQUE CONSTRAINT: games(user_id, game_date)  -- 하루 1게임 보장
 |--------|--------|------|
 | `SERVER_PORT` | `8080` | 백엔드 포트 |
 | `FRONTEND_PORT` | `3000` | 프론트엔드 포트 |
-| `JWT_KEYSTORE_PASSWORD` | `changeit` | RSA 키스토어 비밀번호 |
 | `AWS_REGION` | `ap-northeast-2` | AWS 리전 |
 
 ---
