@@ -1,722 +1,469 @@
-<div align="center">
+# 🟩 Cosmic Wordle
 
-# 🌌 Cosmic Wordle
+> **5글자 영단어 추리 게임** — Spring Boot 3.3 + Next.js 14 풀스택 프로젝트
 
-**우주 테마의 풀스택 Wordle 게임**
-
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
-[![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose)
-
-*단 하나의 명령어로 전체 스택을 실행하는 컨테이너 기반 Wordle 게임*
-
-</div>
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 
 ---
 
-## 📋 목차
+## 📌 프로젝트 개요
 
-- [프로젝트 소개](#-프로젝트-소개)
-- [주요 기능](#-주요-기능)
-- [기술 스택](#-기술-스택)
-- [아키텍처](#-아키텍처)
-- [프로젝트 구조](#-프로젝트-구조)
-- [빠른 시작](#-빠른-시작)
-- [환경 분리 전략](#-환경-분리-전략)
-- [API 명세](#-api-명세)
-- [인증 플로우](#-인증-플로우)
-- [환경변수 가이드](#-환경변수-가이드)
-- [개발 가이드](#-개발-가이드)
+Cosmic Wordle은 NYT Wordle에서 영감을 받은 풀스택 웹 게임입니다.  
+매일 새로운 단어가 출제되며, 6번의 기회 안에 5글자 영단어를 맞추는 것이 목표입니다.
 
----
+**팀 협업** 환경에서 백엔드 보안 아키텍처 설계, API 개발, 인프라 구성을 담당했습니다.
 
-## 🚀 프로젝트 소개
-
-**Cosmic Wordle**은 뉴욕타임즈의 Wordle 게임을 우주(Cosmic) 테마로 재해석한 풀스택 웹 애플리케이션입니다.
-
-### 핵심 설계 원칙
-
-| 원칙 | 구현 방식 |
-|------|-----------|
-| **Zero Local Setup** | 모든 실행 환경을 Docker Compose로 캡슐화, 로컬에 Java·Node.js 불필요 |
-| **Guest-First UX** | 비로그인 상태에서도 완전한 게임 플레이 가능 (localStorage 기반) |
-| **Auth-Optional Sync** | 로그인 시 게임 결과가 백엔드와 자동 동기화 (fire-and-forget) |
-| **HMAC JWT + Rate Limiting** | HMAC-SHA256 JWT 인증 + IP 기반 Rate Limiting으로 경량 보안 |
+### 주요 기능
+- 🎮 **일일 Wordle 게임** — 매일 자정에 새로운 단어 출제
+- 🔐 **JWT 기반 인증/인가** — 회원가입, 로그인, 토큰 갱신
+- 📊 **플레이어 통계** — 승률, 연승 기록, 추측 분포 차트
+- 🛡️ **Rate Limiting** — IP 기반 인증 엔드포인트 보호
+- 🐳 **Docker Compose** — 원커맨드 개발 환경 구성
 
 ---
 
-## ✨ 주요 기능
-
-### 게임 플레이
-- 🎮 **5글자 Wordle 게임** — 하루 1단어, 최대 6번의 시도
-- ⌨️ **물리 키보드 + 화면 키보드** 동시 지원
-- 🎨 **Cosmic 테마 애니메이션** — 타일 플립, 흔들기, 별 배경, 유성 효과
-- 📊 **게임 통계** — 승률, 연속 성공 횟수, 추측 횟수 분포 차트
-
-### 인증 & 계정
-- 🔐 **JWT 기반 회원가입 / 로그인** — 가입 즉시 토큰 발급으로 원클릭 인증
-- 👤 **게스트 플레이** — 로그인 없이 완전한 게임 (localStorage에 통계 저장)
-- 🔄 **통계 동기화** — 로그인 후 게임 결과가 서버에 자동 저장
-
-### 인프라
-- 🐳 **단일 명령 실행** — `docker compose --env-file .env.dev up --build`
-- 🏥 **헬스체크** — Spring Actuator + Next.js healthcheck 연동
-- 🗄️ **Flyway 마이그레이션** — DB 스키마 버전 관리 자동화
-
----
-
-## 🛠 기술 스택
-
-### Backend
-| 분류 | 기술 |
-|------|------|
-| Language | Kotlin 2.0 |
-| Framework | Spring Boot 3.3 |
-| Security | Spring Security · JWT (HMAC-SHA256) · Rate Limiting |
-| ORM | Spring Data JPA + Hibernate |
-| Database | PostgreSQL 15 (AWS RDS) |
-| Migration | Flyway |
-| Build | Gradle 8.5 + Kotlin DSL |
-| Runtime | Eclipse Temurin JDK 21 |
-
-### Frontend
-| 분류 | 기술 |
-|------|------|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS 3 (Custom Cosmic Theme) |
-| State | useReducer + useCallback + startTransition |
-| Data Fetching | SWR + Fetch API |
-| Runtime | Node.js 20 Alpine (Standalone output) |
-
-### DevOps
-| 분류 | 기술 |
-|------|------|
-| Containerization | Docker + Docker Compose |
-| Multi-stage Build | Backend(JDK 21) · Frontend(Node 20 Alpine) |
-| Orchestration | Docker Compose with --env-file |
-
----
-
-## 🏗 아키텍처
+## 🏗️ 아키텍처
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      Docker Compose                          │
-│                                                             │
-│  ┌──────────────────────┐    ┌─────────────────────────┐   │
-│  │   Frontend (Next.js) │    │  Backend (Spring Boot)  │   │
-│  │   Port: 3000         │───▶│  Port: 8080             │   │
-│  │                      │    │                         │   │
-│  │  • App Router        │    │  Security Filter Chains │   │
-│  │  • useReducer        │    │  ┌─────────────────┐    │   │
-│  │  • useAuth (JWT)     │    │  │ @Order(2) HMAC  │    │   │
-│  │  • Cosmic Animations │    │  │   JWT /api/**   │    │   │
-│  │  • localStorage      │    │  │ @Order(3) HMAC  │    │   │
-│  └──────────────────────┘    │  │   /stats/**     │    │   │
-│                              │  │ @Order(4) Form  │    │   │
-│                              │  └─────────────────┘    │   │
-│                              │                         │   │
-│                              │  Modules                │   │
-│                              │  • auth (JWT signup/login)  │
-│                              │  • game (CRUD + eval)   │   │
-│                              │  • word (dictionary)    │   │
-│                              │  • stats (player stats) │   │
-│                              └────────────┬────────────┘   │
-│                                           │                 │
-│                              ┌────────────▼────────────┐   │
-│                              │   PostgreSQL (AWS RDS)   │   │
-│                              │   Flyway Migrations V1-5 │   │
-│                              └─────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────┐       ┌──────────────────────────────────────────┐
+│  Next.js 14 │──────▶│          Spring Boot 3.3 Backend         │
+│  (SPA)      │ REST  │                                          │
+│  Port 3000  │◀──────│  ┌─────────┐  ┌──────┐  ┌────────────┐  │
+└─────────────┘       │  │Auth API │  │Game  │  │Stats API   │  │
+                      │  │/api/auth│  │/api/ │  │/api/stats  │  │
+                      │  │         │  │games │  │            │  │
+                      │  └────┬────┘  └──┬───┘  └─────┬──────┘  │
+                      │       │          │            │          │
+                      │  ┌────▼──────────▼────────────▼──────┐  │
+                      │  │     Spring Security Filter Chain   │  │
+                      │  │  @Order(2) /api/** → JWT 인증     │  │
+                      │  │  @Order(3) /stats/** → JWT 인증   │  │
+                      │  │  @Order(4) 기타 → 폼 로그인       │  │
+                      │  └───────────────┬───────────────────┘  │
+                      │                  │                       │
+                      │         ┌────────▼────────┐             │
+                      │         │  PostgreSQL 15   │             │
+                      │         │  (AWS RDS)       │             │
+                      │         └─────────────────┘             │
+                      └──────────────────────────────────────────┘
 ```
 
-### 보안 레이어 구조
+### 기술 스택
 
-```
-Request → /api/** 경로
-    └─ @Order(2) ApiSecurityFilterChain
-           └─ HMAC-SHA256 JwtDecoder (@Qualifier)
-                  └─ /api/auth/signup, /api/auth/login  → permitAll
-                     /api/games/**, /api/stats           → authenticated
-                     /api/words POST/DELETE               → ADMIN only
-
-Request → /stats/** 경로
-    └─ @Order(3) ResourceServerSecurityFilterChain
-           └─ HMAC-SHA256 JwtDecoder (@Qualifier)
-```
-
-> **HTTPS 정책:** HTTPS 강제는 인프라 레벨(ALB, nginx 리버스 프록시)에서 처리합니다.
-> 보안 아키텍처 상세 — [docs/SECURITY-IMPROVEMENTS.md](docs/SECURITY-IMPROVEMENTS.md)
+| 계층 | 기술 | 비고 |
+|------|------|------|
+| **Frontend** | Next.js 14, React 18, TailwindCSS, SWR | TypeScript |
+| **Backend** | Kotlin 2.0, Spring Boot 3.3, Spring Security | Gradle Kotlin DSL |
+| **인증** | HMAC-SHA256 JWT (Nimbus JOSE) | OAuth2 Resource Server |
+| **DB** | PostgreSQL 15 (AWS RDS), Flyway | JPA / Hibernate |
+| **인프라** | Docker Compose, AWS (RDS, ALB) | 환경별 분리 (dev/test/prod) |
+| **코드 품질** | ktlint, Ehcache | 자동 포맷 + 캐싱 |
 
 ---
 
 ## 📁 프로젝트 구조
 
 ```
-wordle-backend/
-├── backend/                          # Spring Boot (Kotlin)
+wordle/
+├── backend/
 │   ├── src/main/kotlin/com/example/wordle/
-│   │   ├── auth/
-│   │   │   ├── controller/           # ApiAuthController (signup/login)
-│   │   │   ├── domain/               # User 엔티티
-│   │   │   ├── dto/                  # LoginRequest/Response, SignupRequest/Response
-│   │   │   └── service/              # AuthService (BCrypt + JWT 발급)
-│   │   ├── game/
-│   │   │   ├── controller/           # GameController (/api/games/**)
-│   │   │   ├── domain/               # Game, GameGuess, GameStatus, LetterResult
-│   │   │   ├── repository/           # GameRepository, GameGuessRepository
-│   │   │   └── service/
-│   │   │       ├── GameService.kt    # 게임 CRUD, 오늘의 단어 로직
-│   │   │       └── WordEvaluator.kt  # 2-pass 정답 평가 알고리즘
-│   │   ├── security/
-│   │   │   ├── CorsConfig.kt         # 환경변수 기반 CORS 설정
-│   │   │   ├── JwtConfig.kt          # HMAC JWT Bean (@Qualifier)
-│   │   │   ├── JwtSecurityConfig.kt  # 3개 Security Filter Chain (@Order)
-│   │   │   ├── JwtTokenProvider.kt   # 토큰 생성 유틸
-│   │   │   ├── config/
-│   │   │   │   └── RateLimitingConfig.kt  # IP 기반 Rate Limiting 설정
-│   │   │   └── filter/
-│   │   │       └── RateLimitingFilter.kt  # 슬라이딩 윈도우 Rate Limiter
-│   │   ├── stats/
-│   │   │   ├── controller/
-│   │   │   │   ├── ApiStatsController.kt  # GET/POST /api/stats (HMAC JWT)
-│   │   │   │   └── StatsController.kt     # /stats/** (HMAC JWT)
-│   │   │   ├── domain/               # PlayerStats, GuessDist
-│   │   │   └── service/              # StatsService
-│   │   └── word/
-│   │       ├── controller/           # WordController (/api/words)
-│   │       ├── domain/               # Word 엔티티
-│   │       └── service/              # WordService (오늘의 단어 결정)
+│   │   ├── auth/           # 인증/인가 (User, AuthService, JWT)
+│   │   ├── game/           # 게임 로직 (Game, WordEvaluator, 추측 판정)
+│   │   ├── stats/          # 통계 (승률, 연승, 추측 분포)
+│   │   ├── word/           # 단어 관리 (오늘의 단어, 유효성 검증)
+│   │   ├── security/       # Spring Security (JWT, CORS, RateLimit)
+│   │   └── common/         # 공통 예외 처리
 │   ├── src/main/resources/
-│   │   ├── db/migration/
-│   │   │   ├── V001__auth_tables.sql         # users, oauth2 테이블
-│   │   │   ├── V002__create_player_stats.sql # player_stats, guess_dist
-│   │   │   ├── V003__create_words_table.sql  # words 테이블
-│   │   │   ├── V004__create_games_tables.sql # games, game_guesses
-│   │   │   └── V005__seed_words.sql          # ~550개 단어 시드
-│   │   ├── application-dev.yml
-│   │   ├── application-prod.yml
-│   │   └── application-test.yml
-│   └── Dockerfile                    # Multi-stage: gradle:8.5 → temurin:21-jdk
-│
-├── frontend/                         # Next.js 14 (TypeScript)
-│   └── src/
-│       ├── app/
-│       │   ├── layout.tsx            # Root layout (메타데이터, 폰트)
-│       │   └── page.tsx              # 게임 메인 페이지 (useAuth 통합)
-│       ├── components/
-│       │   ├── AuthModal.tsx         # 로그인/회원가입 모달 (Cosmic 테마)
-│       │   ├── GameBoard.tsx         # 6×5 타일 그리드
-│       │   ├── Header.tsx            # 제목 + 통계/도움말/인증 버튼
-│       │   ├── HelpModal.tsx         # 게임 규칙 모달
-│       │   ├── Keyboard.tsx          # QWERTY 화면 키보드
-│       │   ├── StarBackground.tsx    # 시드 기반 별 배경 (SSR 안전)
-│       │   ├── StatsModal.tsx        # 통계 및 분포 차트 모달
-│       │   ├── Tile.tsx              # 단일 타일 (플립 애니메이션)
-│       │   └── Toast.tsx             # 알림 메시지
-│       ├── hooks/
-│       │   ├── useAuth.ts            # JWT 토큰 관리 (localStorage)
-│       │   └── useWordle.ts          # 게임 상태 (useReducer + 백엔드 동기화)
-│       ├── lib/
-│       │   ├── api.ts                # API 클라이언트 (signup/login/stats)
-│       │   ├── gameLogic.ts          # 2-pass 평가 알고리즘
-│       │   └── words.ts              # 단어 목록 + 오늘의 단어 결정
-│       └── types/index.ts            # LetterState, GameState, GameStats 타입
-│
-├── docker-compose.yml                # 전체 스택 오케스트레이션
-├── .env.dev.template                 # 개발 환경변수 템플릿
-├── .env.prod.template
-└── .env.test.template
+│   │   ├── application-{dev,test,prod}.yml
+│   │   ├── db/migration/   # Flyway V001~V006
+│   │   └── words.txt       # 단어 사전
+│   └── build.gradle.kts
+├── frontend/
+│   ├── src/
+│   │   ├── app/            # Next.js App Router
+│   │   ├── components/     # GameBoard, Keyboard, Tile 등
+│   │   ├── hooks/          # useWordle, useAuth
+│   │   └── lib/            # API 클라이언트, 게임 로직
+│   └── package.json
+├── docker-compose.yml
+└── docs/
+    └── SECURITY-IMPROVEMENTS.md
 ```
 
 ---
 
-## ⚡ 빠른 시작
+## 🔐 보안 아키텍처 & 트러블슈팅
+
+이 프로젝트에서 가장 중점을 둔 부분은 **보안 아키텍처의 설계와 리팩터링**입니다.  
+실제 운영 환경을 고려한 보안 결정과, 그 과정에서 발생한 트러블슈팅을 정리합니다.
+
+---
+
+### 🔧 트러블슈팅 1: RSA → HMAC-SHA256 JWT 전환
+
+#### 문제 상황
+초기에 `spring-boot-starter-oauth2-authorization-server`를 도입하여 RSA 기반 JWT를 구성했습니다.  
+하지만 단일 백엔드 + 단일 프론트엔드 구조에서 RSA의 이점(공개키/개인키 분리)이 전혀 활용되지 않았고,  
+키스토어 관리 · Authorization Server 설정 등 불필요한 복잡도만 가중되었습니다.
+
+#### 해결 과정
+1. **의존성 제거** — `spring-boot-starter-oauth2-authorization-server` 삭제
+2. **Dead code 제거** — `AuthorizationServerConfig`, `OAuth2ServiceConfig`, `OAuth2Tables` 등 6개 파일 삭제
+3. **Flyway 마이그레이션** — `V006__drop_oauth2_tables.sql`로 미사용 OAuth2 테이블 Drop
+4. **키스토어 인프라 제거** — `entrypoint.sh`의 keytool 로직, docker-compose 환경변수 정리
+5. **HMAC 단일 방식 채택** — `JwtConfig.kt`에서 `hmacJwtEncoder()`/`hmacJwtDecoder()` Bean만 유지
+
+#### 핵심 코드
+```kotlin
+// JwtConfig.kt — HMAC-SHA256 단일 JWT 인코더/디코더
+@Configuration
+class JwtConfig(
+    @Value("\${app.jwt.secret}") private val jwtSecret: String,
+) {
+    @Bean
+    @Qualifier("hmacJwtEncoder")
+    fun hmacJwtEncoder(): JwtEncoder {
+        val key = OctetSequenceKey.Builder(jwtSecret.toByteArray(Charsets.UTF_8))
+            .algorithm(JWSAlgorithm.HS256)
+            .build()
+        return NimbusJwtEncoder(ImmutableJWKSet(JWKSet(key)))
+    }
+
+    @Bean
+    @Qualifier("hmacJwtDecoder")
+    fun hmacJwtDecoder(): JwtDecoder {
+        val secretKey = SecretKeySpec(jwtSecret.toByteArray(Charsets.UTF_8), "HmacSHA256")
+        return NimbusJwtDecoder.withSecretKey(secretKey)
+            .macAlgorithm(MacAlgorithm.HS256)
+            .build()
+    }
+}
+```
+
+#### 결정 근거
+
+| 관점 | RSA + Authorization Server | HMAC-SHA256 (채택) |
+|------|---------------------------|-------------------|
+| 클라이언트 구조 | 멀티 클라이언트, 써드파티 | **단일 클라이언트 (SPA)** |
+| 운영 오버헤드 | 키스토어 관리, AS 인프라 | 환경변수 1개 (`JWT_SECRET`) |
+| 성능 | RSA 서명 ~1ms | HMAC 서명 ~0.01ms |
+| 서비스 규모 | 마이크로서비스 | **모놀리식 소규모** |
+
+---
+
+### 🔧 트러블슈팅 2: JwtDecoder Bean 충돌 (`@Qualifier` 누락)
+
+#### 문제 상황
+Spring Security의 `@Order(3)` filter chain에서 `JwtDecoder`가 주입될 때,  
+`@Qualifier`가 누락되어 **어떤 디코더가 주입되는지 보장할 수 없는 상태**였습니다.  
+Spring Boot 자동 설정이 만드는 기본 `JwtDecoder`와 충돌할 위험이 존재했습니다.
+
+#### 해결
+```kotlin
+// Before — @Qualifier 누락, 어떤 디코더가 주입될지 비결정적
+@Order(3)
+fun resourceServerSecurityFilterChain(
+    http: HttpSecurity,
+    jwtDecoder: JwtDecoder,  // ❌ 어떤 JwtDecoder?
+)
+
+// After — 명시적 @Qualifier로 의도를 코드에 기록
+@Order(3)
+fun resourceServerSecurityFilterChain(
+    http: HttpSecurity,
+    @Qualifier("hmacJwtDecoder") hmacJwtDecoder: JwtDecoder,  // ✅ HMAC 전용
+)
+```
+
+#### 교훈
+> 동일 타입의 Bean이 여러 개 존재할 가능성이 있으면, **항상 `@Qualifier`를 명시**해야 합니다.  
+> 현재는 동작하더라도, 의존성 추가나 자동 설정 변경으로 언제든 깨질 수 있습니다.
+
+---
+
+### 🔧 트러블슈팅 3: CORS 설정 중복 정리
+
+#### 문제 상황
+`CorsConfig.kt`에서 전역 `CorsConfigurationSource` Bean을 이미 정의하고 있었지만,  
+`JwtSecurityConfig.kt`에도 **동일한 CORS 설정을 인라인으로 중복 정의**하고 있었습니다.  
+설정 변경 시 두 곳을 모두 수정해야 하는 유지보수 문제가 발생했습니다.
+
+#### 해결
+- `JwtSecurityConfig`의 인라인 `corsConfigurationSource()` 메서드 삭제
+- 생성자 주입으로 `CorsConfigurationSource` Bean을 받아 모든 filter chain에서 공유
+
+```kotlin
+@Configuration
+class JwtSecurityConfig(
+    private val corsConfigurationSource: CorsConfigurationSource,  // ← 생성자 주입
+) {
+    @Bean @Order(2)
+    fun apiSecurityFilterChain(http: HttpSecurity, ...): SecurityFilterChain {
+        return http
+            .cors { it.configurationSource(corsConfigurationSource) }  // ← 공유
+            // ...
+    }
+}
+```
+
+---
+
+### 🔧 트러블슈팅 4: Rate Limiting 구현
+
+#### 문제 상황
+인증 엔드포인트(`/api/auth/login`, `/api/auth/signup`)에 **요청 제한이 없어**  
+브루트포스 공격이나 계정 생성 남용에 취약했습니다.
+
+#### 해결
+Spring Security filter chain **외부**에 `OncePerRequestFilter`를 등록하여,  
+Spring Security 처리 전에 IP 기반으로 요청을 차단합니다.
+
+```kotlin
+// RateLimitingFilter.kt — ConcurrentHashMap 기반 슬라이딩 윈도우
+class RateLimitingFilter(
+    private val maxRequests: Int = 20,      // IP당 최대 요청 수
+    private val windowMs: Long = 60_000L,   // 윈도우 크기 (1분)
+) : OncePerRequestFilter() {
+    private val requestLog = ConcurrentHashMap<String, CopyOnWriteArrayList<Long>>()
+
+    override fun doFilterInternal(request, response, filterChain) {
+        val clientIp = resolveClientIp(request)  // X-Forwarded-For 지원
+        val timestamps = requestLog.computeIfAbsent(clientIp) { CopyOnWriteArrayList() }
+        timestamps.removeIf { it < System.currentTimeMillis() - windowMs }
+
+        if (timestamps.size >= maxRequests) {
+            response.status = 429  // Too Many Requests
+            return
+        }
+        timestamps.add(System.currentTimeMillis())
+        filterChain.doFilter(request, response)
+    }
+}
+```
+
+**설계 결정:**
+- 외부 의존성(Redis, Bucket4j) 없이 JVM 내장 자료구조만 사용
+- 수평 확장 시 Redis 기반으로 전환 가능 (현재 단일 인스턴스 전제)
+
+---
+
+### 🔧 트러블슈팅 5: JWT Secret Fallback 값 제거
+
+#### 문제 상황
+`application-dev.yml`과 `docker-compose.yml`에 JWT 시크릿 **하드코딩 fallback** 값이 존재했습니다:
+```yaml
+# Before — 프로덕션에서도 이 값이 사용될 위험
+JWT_SECRET: ${JWT_SECRET:-my-super-secret-jwt-key-that-is-at-least-32-characters}
+```
+
+#### 해결
+모든 환경의 fallback 값을 제거하고, 환경변수가 없으면 **앱이 시작되지 않도록** 강제합니다:
+```yaml
+# After — 환경변수 미설정 시 즉시 실패
+JWT_SECRET: ${JWT_SECRET}
+```
+
+`.env.*.template` 파일에 안전한 시크릿 생성 가이드를 추가:
+```bash
+# 최소 32자 이상, 아래 명령으로 생성 가능:
+# openssl rand -base64 48
+JWT_SECRET=여기에_반드시_32자_이상의_시크릿을_설정하세요
+```
+
+---
+
+### 🔧 트러블슈팅 6: User.kt JVM Platform Declaration Clash
+
+#### 문제 상황
+`User` 엔티티가 `UserDetails`를 구현하면서, 생성자 파라미터명 `username`, `password`, `enabled`가  
+`UserDetails` 인터페이스의 `getUsername()`, `getPassword()`, `isEnabled()` 메서드와 **JVM 시그니처 충돌**을 일으켰습니다:
+
+```
+Platform declaration clash: The following declarations have the same JVM signature
+  fun getUsername(): String  (UserDetails)
+  val username: String       (User constructor)
+```
+
+#### 해결
+생성자 파라미터명을 `_username`, `_password`, `_enabled`로 변경하고,  
+`UserDetails` 인터페이스 메서드를 명시적으로 `override`합니다:
+
+```kotlin
+@Entity
+class User(
+    private val _username: String,
+    private val _password: String,
+    private val _enabled: Boolean = true,
+) : UserDetails {
+    override fun getUsername(): String = _username
+    override fun getPassword(): String = _password
+    override fun isEnabled(): Boolean = _enabled
+}
+```
+
+#### 교훈
+> Kotlin에서 `val username`은 자동으로 `getUsername()` getter를 생성합니다.  
+> Java 인터페이스와 같은 시그니처의 getter가 이미 존재하면 **플랫폼 선언 충돌**이 발생합니다.  
+> `private val _prefix` + 명시적 `override fun` 패턴으로 회피합니다.
+
+---
+
+## 🎮 핵심 게임 로직
+
+### Word Evaluator (2-Pass 알고리즘)
+
+Wordle의 핵심인 글자 판정 로직은 **2-Pass 방식**으로 구현했습니다:
+
+```kotlin
+object WordEvaluator {
+    fun evaluate(guess: String, target: String): List<LetterResult> {
+        val result = Array(5) { LetterResult.ABSENT }
+        val targetRemaining = target.toCharArray()
+
+        // Pass 1: 정확한 위치 (CORRECT)
+        for (i in 0..4) {
+            if (guess[i] == target[i]) {
+                result[i] = LetterResult.CORRECT
+                targetRemaining[i] = '\u0000'  // 사용된 글자 제거
+            }
+        }
+
+        // Pass 2: 다른 위치에 존재 (PRESENT)
+        for (i in 0..4) {
+            if (result[i] == LetterResult.CORRECT) continue
+            val idx = targetRemaining.indexOf(guess[i])
+            if (idx != -1) {
+                result[i] = LetterResult.PRESENT
+                targetRemaining[idx] = '\u0000'
+            }
+        }
+
+        return result.toList()
+    }
+}
+```
+
+**왜 2-Pass인가?**
+- 1-Pass로 처리하면, 같은 글자가 중복될 때 `PRESENT`가 과다 표시됩니다
+- Pass 1에서 `CORRECT`를 먼저 확정 → Pass 2에서 남은 글자만 `PRESENT` 판정
+
+---
+
+## 🚀 실행 방법
 
 ### 사전 요구사항
+- Docker & Docker Compose
+- (선택) JDK 21, Node.js 20
 
-- **Docker Desktop** (또는 Docker Engine + Docker Compose v2)
-- PostgreSQL DB 접속 정보 (AWS RDS 또는 로컬 PostgreSQL)
-
-### 1. 저장소 클론
-
-```bash
-git clone https://github.com/your-username/wordle-backend.git
-cd wordle-backend
-```
-
-### 2. 환경변수 설정
-
-각 환경에 맞는 템플릿을 복사하고 실제 값을 입력합니다.
+### Docker Compose로 실행
 
 ```bash
-# 개발 환경
+# 1. 환경변수 설정
 cp .env.dev.template .env.dev
 
-# 프로덕션 환경
-cp .env.prod.template .env.prod
+# 2. .env.dev 편집 (필수: JWT_SECRET, DB 정보)
+vi .env.dev
 
-# 테스트 환경
-cp .env.test.template .env.test
-```
-
-필수 입력 항목 (dev 기준):
-
-```bash
-# ① DB 연결 정보
-AWS_DEV_DB_URL=jdbc:postgresql://<host>:5432/<database>
-AWS_DEV_DB_USERNAME=<username>
-AWS_DEV_DB_PASSWORD=<password>
-
-# ② JWT 시크릿 (32자 이상 랜덤 문자열 권장)
-#    openssl rand -hex 32
-JWT_SECRET=your-very-secret-key-at-least-32-characters-long
-
-# ③ 프론트엔드 → 백엔드 API 주소
-NEXT_PUBLIC_API_URL=http://localhost:8080
-```
-
-### 3. 환경별 실행
-
-```bash
-# 🔧 개발 환경 (SQL 로그 활성화, actuator 전체 노출)
+# 3. 실행
 docker compose --env-file .env.dev up --build
-
-# 🚀 프로덕션 환경 (로그 최소화, actuator 보안 강화)
-docker compose --env-file .env.prod up --build -d
-
-# 🧪 테스트 환경
-docker compose --env-file .env.test up --build
 ```
 
-| 서비스 | 주소 |
-|--------|------|
-| 🎮 Frontend | http://localhost:3000 |
-| 🔧 Backend API | http://localhost:8080 |
-| 🏥 Health Check | http://localhost:8080/actuator/health |
+| 서비스 | URL |
+|--------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080 |
+| Health Check | http://localhost:8080/actuator/health |
 
-### 4. 중지
+### 로컬 개발 (Gradle)
 
 ```bash
-docker compose down
-```
-
----
-
-## 🌍 환경 분리 전략
-
-단일 `docker-compose.yml` + `--env-file` 플래그 조합으로 dev / test / prod 세 환경을 완전히 분리합니다.
-
-### 환경 선택 흐름
-
-```
-docker compose --env-file .env.{dev|test|prod} up
-       │
-       ├─▶  SPRING_PROFILES_ACTIVE={dev|test|prod}
-       │           │
-       │           ├─▶ application-dev.yml   (개발: SQL 로그, DEBUG)
-       │           ├─▶ application-test.yml  (테스트: create-drop, DEBUG)
-       │           └─▶ application-prod.yml  (운영: validate, WARN, 로그파일)
-       │
-       ├─▶  AWS_{DEV|TEST|PROD}_DB_{URL|USERNAME|PASSWORD}
-       │           └─▶ 각 Spring 프로파일이 자신의 환경 변수만 읽음
-       │
-       ├─▶  JWT_SECRET / CORS_ALLOWED_ORIGINS / LOGGING_LEVEL_ROOT
-       │           └─▶ docker-compose.yml 의 environment 섹션을 통해 컨테이너 주입
-       │
-       └─▶  NEXT_PUBLIC_API_URL
-                   └─▶ Next.js 빌드 시 환경변수로 번들링 (브라우저용)
-```
-
-### 환경별 핵심 차이점
-
-| 항목 | dev | test | prod |
-|------|-----|------|------|
-| **Spring Profile** | `dev` | `test` | `prod` |
-| **DB** | AWS RDS Dev | AWS RDS Test | AWS RDS Prod |
-| **DDL** | `validate` | `create-drop` | `validate` |
-| **SQL 로그** | ✅ ON | ✅ ON | ❌ OFF |
-| **show-details** | `always` | `always` | `never` |
-| **HikariCP pool** | 최대 10 | 최대 5 | 최대 20 |
-| **Actuator 노출** | health+info+beans+metrics+env | health+info+beans+metrics | health+info+metrics |
-| **CORS** | `localhost:3000,3001` | `localhost:3000,3001` | 실제 도메인 |
-| **로그 출력** | 콘솔 (DEBUG) | 콘솔 (DEBUG) | 파일 `/var/log/wordle/` (WARN) |
-| **JWT 만료** | 24h (설정 가능) | 24h (설정 가능) | 24h (설정 가능) |
-| **Flyway baseline** | `true` | — | `false` |
-
-### 보안 강화 포인트 (prod)
-
-```yaml
-# application-prod.yml
-management:
-  endpoint:
-    health:
-      show-details: never     # ← 내부 DB 정보 노출 차단
-
-jpa:
-  show-sql: false              # ← SQL 쿼리 로그 완전 비활성화
-  open-in-view: false          # ← N+1 방지 + 불필요한 커넥션 점유 차단
-
-logging:
-  level:
-    root: WARN                 # ← INFO/DEBUG 로그 차단, 이슈만 기록
-  file:
-    name: /var/log/wordle/application.log  # ← 파일 영속 로깅
-```
-
-### `.env` 파일 보안 관리
-
-```
-# .gitignore (이미 적용됨)
-.env          # ✅ 추적 안 됨
-.env.dev      # ✅ 추적 안 됨
-.env.prod     # ✅ 추적 안 됨
-.env.test     # ✅ 추적 안 됨
-
-# 저장소에 포함되는 것
-.env.dev.template    # ✅ 키 목록 + 안내 주석 (실제 값 없음)
-.env.prod.template   # ✅ 키 목록 + 안내 주석
-.env.test.template   # ✅ 키 목록 + 안내 주석
-```
-
-> **JWT 시크릿 생성 권장 방법**
-> ```bash
-> # 32바이트 랜덤 16진수 문자열 생성
-> openssl rand -hex 32
-> ```
-
----
-
-## 📡 API 명세
-
-### 인증 (Public)
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| `POST` | `/api/auth/signup` | 회원가입 + JWT 토큰 즉시 발급 |
-| `POST` | `/api/auth/login` | 로그인 + JWT 토큰 발급 |
-
-**회원가입 요청/응답**
-```json
-// POST /api/auth/signup
-{
-  "username": "cosmo",
-  "email": "cosmo@example.com",
-  "password": "Secure@1234"
-}
-
-// 200 OK
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "username": "cosmo",
-  "email": "cosmo@example.com",
-  "accessToken": "eyJhbGci...",
-  "tokenType": "Bearer",
-  "expiresIn": 86400
-}
-```
-
-**로그인 요청/응답**
-```json
-// POST /api/auth/login
-{
-  "username": "cosmo",
-  "password": "Secure@1234"
-}
-
-// 200 OK
-{
-  "accessToken": "eyJhbGci...",
-  "tokenType": "Bearer",
-  "userId": "550e8400-...",
-  "username": "cosmo",
-  "role": "USER",
-  "expiresIn": 86400
-}
-```
-
-### 게임 (인증 필요 — `Authorization: Bearer <token>`)
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| `GET` | `/api/games/today` | 오늘의 게임 조회/시작 |
-| `GET` | `/api/games/{id}` | 특정 게임 조회 |
-| `GET` | `/api/games` | 게임 히스토리 |
-| `POST` | `/api/games/{id}/guesses` | 단어 추측 제출 |
-
-**추측 제출 요청/응답**
-```json
-// POST /api/games/{id}/guesses
-{ "word": "CRANE" }
-
-// 201 Created
-{
-  "guessNumber": 1,
-  "word": "CRANE",
-  "result": ["CORRECT", "ABSENT", "PRESENT", "ABSENT", "CORRECT"],
-  "gameStatus": "PLAYING"
-}
-```
-
-### 통계 (인증 필요)
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| `GET` | `/api/stats` | 내 통계 조회 |
-| `POST` | `/api/stats` | 게임 결과 저장 (프론트엔드 동기화용) |
-
-**통계 응답**
-```json
-// GET /api/stats
-{
-  "gamesPlayed": 42,
-  "gamesWon": 35,
-  "currentStreak": 5,
-  "maxStreak": 12,
-  "guessDistribution": [2, 8, 12, 9, 3, 1]  // 1~6번 시도별 승리 횟수
-}
-```
-
-### 단어 관리
-
-| Method | Endpoint | 권한 | 설명 |
-|--------|----------|------|------|
-| `GET` | `/api/words` | USER | 단어 목록 조회 |
-| `POST` | `/api/words` | ADMIN | 단어 추가 |
-| `DELETE` | `/api/words/{id}` | ADMIN | 단어 삭제 |
-
----
-
-## 🔐 인증 플로우
-
-```
-[회원가입 / 로그인]
-  ┌────────────┐   POST /api/auth/signup   ┌──────────────────┐
-  │  Frontend  │ ─────────────────────────▶│  ApiAuthController│
-  │            │◀─────────────────────────  │  AuthService      │
-  │            │  { accessToken, username } │  BCrypt + HMAC JWT│
-  └────────────┘                            └──────────────────┘
-
-[인증된 API 호출]
-  ┌────────────┐   Authorization: Bearer <token>   ┌─────────────────┐
-  │  Frontend  │ ─────────────────────────────────▶│ @Order(2) Chain │
-  │ useAuth.ts │                                    │ HmacJwtDecoder  │
-  │ (localStorage)│◀─────────────────────────────   │ @AuthPrincipal  │
-  └────────────┘   200 OK + game/stats data         │ Jwt → UUID      │
-                                                    └─────────────────┘
-
-[게스트 플레이]
-  ┌────────────┐
-  │  Frontend  │  API 호출 없음 — localStorage만 사용
-  │ useWordle  │  게임 상태: localStorage['cosmic-wordle-state']
-  │            │  통계:      localStorage['cosmic-wordle-stats']
-  └────────────┘
-```
-
-### JWT 구조 (HMAC-SHA256)
-
-```
-┌─────────────────────────────────────┐
-│  JwtConfig.kt                       │
-│                                     │
-│  @Bean @Qualifier("hmacJwtEncoder") │  ← 토큰 발급
-│  fun hmacJwtEncoder(): JwtEncoder   │    HMAC-SHA256 (대칭키)
-│                                     │    JWT_SECRET 환경변수
-│  @Bean @Qualifier("hmacJwtDecoder") │  ← 토큰 검증
-│  fun hmacJwtDecoder(): JwtDecoder   │    /api/**, /stats/** 공통
-└─────────────────────────────────────┘
-
-보안 레이어:
-  RateLimitingFilter → /api/auth/* (IP당 분당 20회)
-  @Order(2) ApiSecurityFilterChain → /api/** (HMAC JWT)
-  @Order(3) ResourceServerFilterChain → /stats/** (HMAC JWT)
-  @Order(4) DefaultSecurityFilterChain → 나머지 (폼 로그인)
-```
-
----
-
-## 🎨 프론트엔드 특징
-
-### Cosmic 색상 팔레트
-
-| 변수명 | HEX | 용도 |
-|--------|-----|------|
-| `cosmic-dark` | `#141A26` | 배경 |
-| `cosmic-blue` | `#42708C` | 정답 위치 타일, 버튼 |
-| `cosmic-gold` | `#F2BF91` | 정확한 글자(위치 맞음) |
-| `cosmic-red` | `#733C3C` | 오류, 에러 상태 |
-| `cosmic-white` | `#E8F1F5` | 텍스트 |
-| `cosmic-gray` | `#9BADB8` | 보조 텍스트, 미사용 키 |
-
-### 핵심 애니메이션
-
-| 애니메이션 | 트리거 | 설명 |
-|-----------|--------|------|
-| `tileFlip` | 단어 제출 | 타일이 뒤집히며 색상 변경 (3D rotateX) |
-| `tileBounce` | 글자 입력 | 타일 튀어오르기 |
-| `tileShake` | 유효하지 않은 단어 | 행 흔들기 |
-| `twinkle` | 항상 | 별 배경 깜박임 |
-| `shootingStar` | 항상 | 유성 이동 |
-| `slide-up` | 모달 열기 | 모달 슬라이드인 |
-
-### 상태 관리 구조
-
-```typescript
-// useReducer 기반 게임 상태
-type Action =
-  | { type: 'INIT_GAME'; payload: { targetWord: string } }
-  | { type: 'ADD_LETTER'; payload: { letter: string } }
-  | { type: 'REMOVE_LETTER' }
-  | { type: 'SUBMIT_GUESS' }
-  | { type: 'REVEAL_TILE'; payload: { row: number; col: number; state: LetterState } }
-  | { type: 'SET_SHAKING'; payload: { row: number } }
-  | { type: 'SET_MESSAGE'; payload: { message: string } }
-  // ...
-
-// 타일 공개: 300ms 간격 스태거드 애니메이션
-states.forEach((tileState, i) => {
-  setTimeout(() => {
-    dispatch({ type: 'REVEAL_TILE', payload: { row, col: i, state: tileState } });
-  }, 300 * (i + 1));  // 300ms, 600ms, 900ms, 1200ms, 1500ms
-});
-```
-
----
-
-## 🗄️ 데이터베이스 스키마
-
-### Flyway 마이그레이션 히스토리
-
-| 버전 | 파일 | 내용 |
-|------|------|------|
-| V001 | `auth_tables.sql` | `users`, OAuth2 관련 테이블 |
-| V002 | `create_player_stats.sql` | `player_stats`, `guess_dist` 테이블 |
-| V003 | `create_words_table.sql` | `words` 테이블 (is_answer 구분) |
-| V004 | `create_games_tables.sql` | `games`, `game_guesses` + UNIQUE(user_id, game_date) |
-| V005 | `seed_words.sql` | 정답 단어 ~350개 + 유효 단어 ~200개 시드 |
-
-### 핵심 테이블 관계
-
-```sql
-users (id UUID PK)
-  └─▶ player_stats (user_id FK, games_played, games_won, streaks, ...)
-  └─▶ games        (user_id FK, game_date, status, target_word)
-        └─▶ game_guesses (game_id FK, guess_number, word, result[])
-
-UNIQUE CONSTRAINT: games(user_id, game_date)  -- 하루 1게임 보장
-```
-
----
-
-## ⚙️ 환경변수 가이드
-
-전체 환경변수는 각 `.env.*.template` 파일을 참조하세요.
-
-### DB 연결 변수 (환경별 구분)
-
-| 환경 | 변수명 | Spring 프로파일 |
-|------|--------|----------------|
-| dev | `AWS_DEV_DB_URL` / `AWS_DEV_DB_USERNAME` / `AWS_DEV_DB_PASSWORD` | `application-dev.yml` |
-| test | `AWS_TEST_DB_URL` / `AWS_TEST_DB_USERNAME` / `AWS_TEST_DB_PASSWORD` | `application-test.yml` |
-| prod | `AWS_PROD_DB_URL` / `AWS_PROD_DB_USERNAME` / `AWS_PROD_DB_PASSWORD` | `application-prod.yml` |
-
-### 공통 필수 변수 (세 환경 모두)
-
-| 변수명 | 설명 | dev 예시 | prod 예시 |
-|--------|------|----------|-----------|
-| `SPRING_PROFILES_ACTIVE` | Spring 프로파일 선택 | `dev` | `prod` |
-| `JWT_SECRET` | HMAC-SHA256 시크릿 (32자+) | `dev-secret-key...` | `openssl rand -hex 32` |
-| `JWT_EXPIRATION_MS` | JWT 만료시간 (ms) | `86400000` | `86400000` |
-| `CORS_ALLOWED_ORIGINS` | CORS 허용 출처 | `http://localhost:3000` | `https://your-domain.com` |
-| `LOGGING_LEVEL_ROOT` | 루트 로그 레벨 | `INFO` | `WARN` |
-| `NEXT_PUBLIC_API_URL` | 프론트 → 백엔드 URL | `http://localhost:8080` | `https://your-domain.com` |
-
-### 선택 변수
-
-| 변수명 | 기본값 | 설명 |
-|--------|--------|------|
-| `SERVER_PORT` | `8080` | 백엔드 포트 |
-| `FRONTEND_PORT` | `3000` | 프론트엔드 포트 |
-| `AWS_REGION` | `ap-northeast-2` | AWS 리전 |
-
----
-
-## 🔧 개발 가이드
-
-### 컨테이너 내부 개발 (Spring Boot DevTools)
-
-```bash
-# 컨테이너 실행 후 내부 접속
-docker compose --env-file .env.dev up -d
-docker compose exec backend bash
-
-# 컨테이너 내부에서 Gradle 실행
-cd /workspace
+cd backend
+export JWT_SECRET="$(openssl rand -base64 48)"
 ./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
-### DB 직접 접속
+---
 
-```bash
-# 컨테이너 내부의 psql로 AWS RDS 접속
-docker compose exec backend bash
-psql -h <RDS_ENDPOINT> -U <USERNAME> -d <DATABASE>
-```
+## 📊 API 엔드포인트
 
-### 환경별 실행
+### 인증
+| Method | Path | 설명 | 인증 |
+|--------|------|------|------|
+| POST | `/api/auth/signup` | 회원가입 | - |
+| POST | `/api/auth/login` | 로그인 (JWT 발급) | - |
 
-```bash
-# 🔧 개발 환경 (포그라운드, 로그 실시간 확인)
-docker compose --env-file .env.dev up --build
+### 게임
+| Method | Path | 설명 | 인증 |
+|--------|------|------|------|
+| POST | `/api/games` | 오늘의 게임 시작/조회 | JWT |
+| POST | `/api/games/{id}/guesses` | 추측 제출 | JWT |
+| GET | `/api/games/{id}` | 게임 상세 조회 | JWT |
+| GET | `/api/games/history` | 게임 이력 조회 | JWT |
 
-# 🧪 테스트 환경
-docker compose --env-file .env.test up --build
+### 통계
+| Method | Path | 설명 | 인증 |
+|--------|------|------|------|
+| GET | `/api/stats` | 플레이어 통계 조회 | JWT |
+| POST | `/api/stats` | 게임 결과 기록 | JWT |
 
-# 🚀 프로덕션 환경 (백그라운드 데몬)
-docker compose --env-file .env.prod up --build -d
-```
+### 단어 관리
+| Method | Path | 설명 | 인증 |
+|--------|------|------|------|
+| GET | `/api/words` | 오늘의 단어 조회 | JWT |
+| POST | `/api/words` | 단어 추가 | ADMIN |
+| DELETE | `/api/words/{id}` | 단어 삭제 | ADMIN |
 
-### 로그 확인
+---
 
-```bash
-# 전체 서비스 로그
-docker compose logs -f
+## 🗄️ DB 마이그레이션 (Flyway)
 
-# 백엔드만
-docker compose logs -f backend
-
-# 프론트엔드만
-docker compose logs -f frontend
-
-# 프로덕션 파일 로그 (컨테이너 내부)
-docker compose exec backend tail -f /var/log/wordle/application.log
-```
+| 버전 | 파일 | 내용 |
+|------|------|------|
+| V001 | `V001__auth_tables.sql` | users 테이블 생성 |
+| V002 | `V002__create_player_stats.sql` | player_stats 테이블 생성 |
+| V003 | `V003__create_words_table.sql` | words 테이블 생성 |
+| V004 | `V004__create_games_tables.sql` | games, game_guesses 테이블 생성 |
+| V005 | `V005__seed_words.sql` | 초기 단어 데이터 시드 |
+| V006 | `V006__drop_oauth2_tables.sql` | 미사용 OAuth2 테이블 제거 |
 
 ---
 
 ## 🧪 테스트
 
 ```bash
-# 컨테이너 내부에서 테스트 실행
-docker compose exec backend ./gradlew test
-
-# 헬스체크
-curl http://localhost:8080/actuator/health
-# → {"status":"UP"}
-
-# API 동작 확인
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"testuser","password":"Test@1234"}'
+cd backend
+./gradlew test
 ```
+
+- `StatsServiceTest` — 통계 서비스 단위 테스트
+- `StatsControllerTest` — MockMvc 기반 통합 테스트 (H2 인메모리)
 
 ---
 
-<div align="center">
+## 📝 환경별 설정
 
-Made with ☕ and 🌌 by [Your Name]
+| 환경 | 프로파일 | DB | 특이사항 |
+|------|---------|-----|---------|
+| **dev** | `application-dev.yml` | AWS RDS (dev) | Flyway 자동 마이그레이션 |
+| **test** | `application-test.yml` | H2 인메모리 | ddl-auto: create-drop |
+| **prod** | `application-prod.yml` | AWS RDS (prod) | Flyway only, 로깅 최소화 |
 
-</div>
+---
+
+## 👤 담당 역할
+
+- **백엔드 보안 아키텍처** — JWT 전략 설계 (RSA → HMAC 전환), Security Filter Chain 구성
+- **Rate Limiting** — 인메모리 슬라이딩 윈도우 방식 IP 기반 요청 제한
+- **API 설계 및 구현** — Auth / Game / Stats / Word 전체 REST API
+- **인프라 구성** — Docker Compose, 환경별 분리 (dev/test/prod), AWS RDS 연동
+- **코드 품질** — ktlint 적용, 빈 파일 정리, wildcard import 제거
+
+---
+
+## 📄 라이선스
+
+이 프로젝트는 학습 및 포트폴리오 목적으로 작성되었습니다.
