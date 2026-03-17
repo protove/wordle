@@ -17,13 +17,13 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
-class JwtSecurityConfig {
+class JwtSecurityConfig(
+    private val corsConfigurationSource: CorsConfigurationSource
+) {
 
     @Bean
     @Order(2)
@@ -34,7 +34,7 @@ class JwtSecurityConfig {
         return http
             .securityMatcher("/api/**")
             .csrf { it.disable() }
-            .cors { it.configurationSource(corsConfigurationSource()) }
+            .cors { it.configurationSource(corsConfigurationSource) }
             .sessionManagement { session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
@@ -55,21 +55,12 @@ class JwtSecurityConfig {
             .build()
     }
 
-    private fun corsConfigurationSource(): CorsConfigurationSource {
-        val configuration = CorsConfiguration()
-        configuration.allowedOriginPatterns = listOf("*")
-        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        configuration.allowedHeaders = listOf("*")
-        configuration.allowCredentials = true
-        configuration.maxAge = 3600L
-        val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", configuration)
-        return source
-    }
-
     @Bean
     @Order(3)
-    fun resourceServerSecurityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun resourceServerSecurityFilterChain(
+        http: HttpSecurity,
+        @Qualifier("hmacJwtDecoder") hmacJwtDecoder: JwtDecoder
+    ): SecurityFilterChain {
         return http
             .securityMatcher("/stats/**", "/actuator/health")
             .authorizeHttpRequests { auth ->
@@ -80,6 +71,7 @@ class JwtSecurityConfig {
             }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
+                    jwt.decoder(hmacJwtDecoder)
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
                 }
             }
@@ -87,6 +79,7 @@ class JwtSecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
             .csrf { it.disable() }
+            .cors { it.configurationSource(corsConfigurationSource) }
             .build()
     }
 
