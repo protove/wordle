@@ -45,16 +45,6 @@ spring:
           order_inserts: true
           order_updates: true
 
-  # 프로덕션 보안 설정 (OAuth2 RSA JWT)
-  security:
-    oauth2:
-      authorizationserver:
-        jwt:
-          keystore:
-            location: ${JWT_KEYSTORE_LOCATION:classpath:keystore.p12}
-            password: ${JWT_KEYSTORE_PASSWORD:changeit}
-            alias: ${JWT_KEYSTORE_ALIAS:wordle-jwt}
-
 # 프로덕션 환경 모니터링 설정 (보안 강화 — 최소 노출)
 management:
   endpoints:

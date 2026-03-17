@@ -18,9 +18,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
     "spring.datasource.driver-class-name=org.h2.Driver",
     "spring.jpa.hibernate.ddl-auto=create-drop",
     "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-    "spring.security.oauth2.authorizationserver.key-store=classpath:test-keystore.p12",
-    "spring.security.oauth2.authorizationserver.key-store-password=changeit",
-    "spring.security.oauth2.authorizationserver.key-alias=oauth-key"
+    "app.jwt.secret=test-secret-key-that-is-at-least-32-characters-long",
+    "spring.flyway.enabled=false"
 ])
 class StatsControllerTest(
     @Autowired val mockMvc: MockMvc

@@ -37,16 +37,6 @@ spring:
           order_inserts: true
           order_updates: true
           
-  # 보안 설정 (개발용)
-  security:
-    oauth2:
-      authorizationserver:
-        jwt:
-          keystore:
-            location: ${JWT_KEYSTORE_LOCATION:classpath:keystore.p12}
-            password: ${JWT_KEYSTORE_PASSWORD:changeit}
-            alias: ${JWT_KEYSTORE_ALIAS:wordle-jwt}
-
 management:
   endpoints:
     web:

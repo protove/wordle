@@ -44,20 +44,9 @@ services:
       AWS_PROD_DB_URL: ${AWS_PROD_DB_URL:-}
       AWS_PROD_DB_USERNAME: ${AWS_PROD_DB_USERNAME:-}
       AWS_PROD_DB_PASSWORD: ${AWS_PROD_DB_PASSWORD:-}
-      
-      # OAuth2 JWT 키스토어 (RSA)
-      JWT_KEYSTORE_LOCATION: ${JWT_KEYSTORE_LOCATION:-classpath:keystore.p12}
-      JWT_KEYSTORE_PASSWORD: ${JWT_KEYSTORE_PASSWORD:-changeit}
-      JWT_KEYSTORE_ALIAS: ${JWT_KEYSTORE_ALIAS:-wordle-jwt}
-
-      # entrypoint.sh 스크립트용 키스토어 자동 생성 설정
-      KEYSTORE_PATH: ${KEYSTORE_PATH:-/workspace/src/main/resources/keys/keystore.p12}
-      KEY_ALIAS: ${KEY_ALIAS:-oauth-key}
-      KEYSTORE_PW: ${KEYSTORE_PW:-changeit}
-      DNAME: ${DNAME:-CN=wordle-auth, OU=Dev, O=Wordle, L=Seoul, S=Seoul, C=KR}
 
       # API JWT 시크릿 (HMAC-SHA256) — 반드시 .env 파일에서 오버라이드
-      JWT_SECRET: ${JWT_SECRET:-cosmic-wordle-default-secret-key-change-in-production}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
 
       # CORS 허용 출처 — 프로덕션에서는 실제 도메인으로 변경
