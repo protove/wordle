@@ -47,21 +47,11 @@ Cosmic Wordle은 Wordle 게임을 웹 서비스 형태로 구현한 프로젝트
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  User[User] --> FE[React Frontend]
-  FE --> API[Spring Boot API]
-  API --> Auth[Auth Controller]
-  API --> Game[Game API]
-  API --> Stats[Stats API]
-  Auth --> JWT[HMAC-SHA256 JWT]
-  API --> Security[Spring Security Filter Chain]
-  Security --> RateLimit[Rate Limiting Filter]
-  API --> DB[(PostgreSQL)]
-  Test[(H2 Test DB)] --> API
-```
+<p align="center">
+  <img src="docs/readme-assets/app-architecture.svg" alt="Cosmic Wordle application architecture diagram" width="900" />
+</p>
 
-## 내가 담당한 역할
+## 담당한 역할
 
 - Docker Compose 기반 개발 환경 통일
 - env 분리와 dev/test/prod profile 정리
